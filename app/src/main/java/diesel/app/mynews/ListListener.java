@@ -7,8 +7,12 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 
+import java.util.List;
 
-///класс слушатель клика по элементу ListView
+
+/**
+ * Created by Rinat Galiev on 20.10.2016.
+ */
 public class ListListener implements OnItemClickListener {
 
     List<RssItem> listItems;
@@ -18,7 +22,6 @@ public class ListListener implements OnItemClickListener {
         listItems = aListItems;
         activity  = anActivity;
     }
-    //ќткрываем в браузере страницу выбранной новости
     public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
         Intent i = new Intent(Intent.ACTION_VIEW);
         i.setData(Uri.parse(listItems.get(pos).getLink()));

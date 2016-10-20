@@ -1,5 +1,16 @@
 package diesel.app.mynews;
 
+import android.app.Activity;
+import android.app.ProgressDialog;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.view.KeyEvent;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListView;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -7,26 +18,17 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.List;
 
-import android.app.Activity;
-import android.app.ProgressDialog;
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.view.KeyEvent;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ListView;
-
-public class MainActivity extends Activity implements OnClickListener {
+/**
+ * Created by Rinat Galiev on 20.10.2016.
+ */
+public class MainActivity extends Activity implements View.OnClickListener {
     ProgressDialog progress;
-    View feedLayout;//панель настройки фида
+    View feedLayout;
     Button okButton;
     EditText feedEdit;
-    GetRSSDataTask task;//наш AsyncTask
+    GetRSSDataTask task;
     String feedUrl;
-    boolean feedChanged = false;//индикатор изменения источника
+    boolean feedChanged = false;
     protected MainActivity context;
 
     @Override
@@ -40,7 +42,6 @@ public class MainActivity extends Activity implements OnClickListener {
         okButton.setOnClickListener(this);
         feedEdit = (EditText) findViewById(R.id.editFeed);
 
-        //—читываем адрес фида из файла, если файла нет, то задаем яндекс новости
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(openFileInput("Feed.txt")));
             feedUrl = br.readLine();
@@ -51,13 +52,11 @@ public class MainActivity extends Activity implements OnClickListener {
         }
         feedEdit.setText(feedUrl);
         progress = new ProgressDialog(this);
-        //запускаем AsyncTask, который собственно формирует нашу ленту
         task = new GetRSSDataTask();
         task.execute(feedUrl);
 
     }
 
-    //Ётот метод обрабатывает нажати¤ на аппаратную кнопку меню
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event)
     {
@@ -69,8 +68,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
     }
 
-    ///если будут вопросы по этому классу, с удовольствием отвечу
-    private class GetRSSDataTask extends AsyncTask<String, Void, List<RssItem> > {
+    private class GetRSSDataTask extends AsyncTask<String, Void, List<RssItem>> {
         @Override
         protected List<RssItem> doInBackground(String... urls) {
             publishProgress(null);
@@ -112,7 +110,6 @@ public class MainActivity extends Activity implements OnClickListener {
         }
     }
 
-    ///этот метод обрабатывает нажатия на кнопку ок
     @Override
     public void onClick(View v) {
         feedChanged = true;
