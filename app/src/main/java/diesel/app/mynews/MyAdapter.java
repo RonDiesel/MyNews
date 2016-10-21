@@ -21,7 +21,7 @@ import java.util.List;
  */
 public class MyAdapter extends ArrayAdapter<RssItem> {
     public MyAdapter(Context context, List<RssItem> res) {
-        super(context, R.layout.item, res);
+        super(context, R.layout.item_main, res);
     }
 
     @Override
@@ -30,7 +30,7 @@ public class MyAdapter extends ArrayAdapter<RssItem> {
 
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext())
-                    .inflate(R.layout.item, null);
+                    .inflate(R.layout.item_main, null);
         }
 
         ((TextView) convertView.findViewById(R.id.title))

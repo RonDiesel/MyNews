@@ -7,27 +7,6 @@
     android:background="@color/White"
     android:orientation="vertical" >
 
-    <LinearLayout
-        android:id="@+id/feedlayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
-
-        <EditText
-            android:id="@+id/editFeed"
-            android:layout_width="wrap_content"
-            android:layout_height="fill_parent"
-            android:layout_weight="1"
-            android:background="@color/LightGrey"
-            android:ems="10" />
-
-        <Button
-            android:id="@+id/button1"
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="fill_parent"
-            android:layout_weight="1"
-            android:text="Ok" />
-    </LinearLayout>
 
     <ListView
         android:id="@+id/listMainView"

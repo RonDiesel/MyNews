@@ -2,55 +2,52 @@ package diesel.app.mynews;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.KeyEvent;
-import android.view.View;
+import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.List;
 
 /**
  * Created by Rinat Galiev on 20.10.2016.
  */
-public class MainActivity extends Activity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity {
     ProgressDialog progress;
-    View feedLayout;
-    Button okButton;
-    EditText feedEdit;
+
+
     GetRSSDataTask task;
     String feedUrl;
     boolean feedChanged = false;
     protected MainActivity context;
+    SharedPreferences mFeeds;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mFeeds = getSharedPreferences("Feeds", Context.MODE_PRIVATE);
         context = this;
-        feedLayout = findViewById(R.id.feedlayout);
-        feedLayout.setVisibility(View.GONE);
-        okButton = (Button) findViewById(R.id.button1);
-        okButton.setOnClickListener(this);
-        feedEdit = (EditText) findViewById(R.id.editFeed);
 
-        try {
-            BufferedReader br = new BufferedReader(new InputStreamReader(openFileInput("Feed.txt")));
-            feedUrl = br.readLine();
-            br.close();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
+        if (mFeeds.contains("feed0")) {
+            feedUrl = mFeeds.getString("feed0", "");
+        }else{
             feedUrl = "https://news.yandex.ru/world.rss";
+            SharedPreferences.Editor editor = mFeeds.edit();
+            editor.putString("feed0", feedUrl);
+            editor.apply();
         }
-        feedEdit.setText(feedUrl);
+
+
         progress = new ProgressDialog(this);
         task = new GetRSSDataTask();
         task.execute(feedUrl);
@@ -58,15 +55,25 @@ public class MainActivity extends Activity implements View.OnClickListener {
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event)
-    {
-        if (keyCode == KeyEvent.KEYCODE_MENU) {
-            feedLayout.setVisibility((feedLayout.getVisibility())==View.VISIBLE? View.GONE: View.VISIBLE);
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
             return true;
         }
-        return super.onKeyDown(keyCode, event);
-
+        return super.onOptionsItemSelected(item);
     }
+
 
     private class GetRSSDataTask extends AsyncTask<String, Void, List<RssItem>> {
         @Override
@@ -110,14 +117,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
     }
 
-    @Override
-    public void onClick(View v) {
-        feedChanged = true;
-        feedUrl = feedEdit.getText().toString();
-        feedLayout.setVisibility(View.GONE);
-        task = new GetRSSDataTask();
-        task.execute(feedUrl);
-    }
 
 
 
