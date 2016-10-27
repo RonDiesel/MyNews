@@ -1,10 +1,10 @@
 package diesel.app.mynews;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -13,10 +13,13 @@ import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.appindexing.Thing;
+
+import java.util.ArrayList;
 import java.util.List;
+
 
 /**
  * Created by Rinat Galiev on 20.10.2016.
@@ -27,9 +30,11 @@ public class MainActivity extends AppCompatActivity {
 
     GetRSSDataTask task;
     String feedUrl;
-    boolean feedChanged = false;
     protected MainActivity context;
     SharedPreferences mFeeds;
+    ArrayList<RssItem> rssFeed;
+    ArrayAdapter<RssItem> adapter;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -37,21 +42,42 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mFeeds = getSharedPreferences("Feeds", Context.MODE_PRIVATE);
         context = this;
+        ArrayList<String> feeds;
 
         if (mFeeds.contains("feed0")) {
-            feedUrl = mFeeds.getString("feed0", "");
-        }else{
+            feeds = loadList();
+        } else {
             feedUrl = "https://news.yandex.ru/world.rss";
             SharedPreferences.Editor editor = mFeeds.edit();
             editor.putString("feed0", feedUrl);
             editor.apply();
+            feeds = new ArrayList<String>();
+            feeds.add(feedUrl);
         }
-
+        rssFeed = new ArrayList<RssItem>();
+        ListView itcItems = (ListView) findViewById(R.id.listMainView);
+        adapter = new MyAdapter(context, rssFeed);
+        itcItems.setAdapter(adapter);
+        itcItems.setOnItemClickListener(new ListListener(rssFeed, context));
 
         progress = new ProgressDialog(this);
-        task = new GetRSSDataTask();
-        task.execute(feedUrl);
+       for(String i:feeds) {
+            task = new GetRSSDataTask();
+            task.execute(i);
+       }
 
+    }
+
+    private ArrayList<String> loadList() {
+        ArrayList<String> feeds = new ArrayList<String>();
+        for (int i = 0; i < 10; i++) {
+            String feed = "feed" + i;
+            if (mFeeds.contains(feed)) {
+                feeds.add(mFeeds.getString(feed, ""));
+            }
+        }
+
+        return feeds;
     }
 
     @Override
@@ -60,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -74,12 +101,33 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    public Action getIndexApiAction() {
+        Thing object = new Thing.Builder()
+                .setName("Main Page") // TODO: Define a title for the content shown.
+                // TODO: Make sure this auto-generated URL is correct.
+                .setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
+                .build();
+        return new Action.Builder(Action.TYPE_VIEW)
+                .setObject(object)
+                .setActionStatus(Action.STATUS_TYPE_COMPLETED)
+                .build();
+    }
+
+
+
+
+
 
     private class GetRSSDataTask extends AsyncTask<String, Void, List<RssItem>> {
         @Override
         protected List<RssItem> doInBackground(String... urls) {
             publishProgress(null);
             try {
+
                 RssReader rssReader = new RssReader(urls[0]);
 
                 return rssReader.getItems();
@@ -89,36 +137,25 @@ public class MainActivity extends AppCompatActivity {
 
             return null;
         }
+
         @Override
         protected void onProgressUpdate(Void... values) {
             // TODO Auto-generated method stub
             super.onProgressUpdate(values);
             progress.show();
         }
+
         @Override
         protected void onPostExecute(List<RssItem> result) {
             progress.dismiss();
-            if(result==null){
+            if (result == null) {
             }
-            ListView itcItems = (ListView) findViewById(R.id.listMainView);
-            ArrayAdapter<RssItem> adapter = new MyAdapter(context, result);
-            itcItems.setAdapter(adapter);
-            itcItems.setOnItemClickListener(new ListListener(result, context));
-            if(feedChanged){
-                BufferedWriter bw;
-                try {
-                    bw = new BufferedWriter(new OutputStreamWriter(openFileOutput("Feed.txt", MODE_PRIVATE)));
-                    bw.write(feedUrl);
-                    bw.close();
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                }
-            }
+
+            rssFeed.addAll(result);
+            adapter.notifyDataSetChanged();
+
         }
     }
-
-
-
 
 
 }

@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -24,53 +25,63 @@ public class MyAdapter extends ArrayAdapter<RssItem> {
         super(context, R.layout.item_main, res);
     }
 
+    static class ViewHolderItem {
+        TextView title;
+        TextView text;
+        TextView pubDate;
+        ImageView image;
+    }
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         RssItem item = getItem(position);
+        ViewHolderItem viewHolder;
 
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext())
                     .inflate(R.layout.item_main, null);
+            viewHolder = new ViewHolderItem();
+            viewHolder.title = (TextView) convertView.findViewById(R.id.title);
+            viewHolder.text = (TextView) convertView.findViewById(R.id.text);
+            viewHolder.pubDate = (TextView) convertView.findViewById(R.id.pubDate);
+            viewHolder.image = (ImageView) convertView.findViewById(R.id.imageView1);
+            convertView.setTag(viewHolder);
+
+        }else{
+            viewHolder = (ViewHolderItem) convertView.getTag();
         }
 
-        ((TextView) convertView.findViewById(R.id.title))
-                .setText(item.getTitle());
-        ((TextView) convertView.findViewById(R.id.text))
-                .setText(item.getText());
-        ((TextView) convertView.findViewById(R.id.pubDate))
-                .setText(item.getPubDate());
-        if (item.getImglink()!= null){
-            ImgInfo imgInfo = new ImgInfo(item.getImglink(), convertView);
+        viewHolder.title.setText(item.getTitle());
+        viewHolder.text.setText(item.getText());
+        viewHolder.pubDate.setText(item.getPubDate());
+        /*if (item.getImglink()!= null){
+            ImgInfo imgInfo = new ImgInfo(item.getImglink(), viewHolder);
             GetImg task = new GetImg();
             task.execute(imgInfo);
-
-
-
-        }
+        }*/
         return convertView;
     }
     private class ImgInfo{
         String url;
-        View parent;
-        public ImgInfo(String url, View parent){
+        ViewHolderItem holder;
+        public ImgInfo(String url, ViewHolderItem holder){
             this.url = url;
-            this.parent = parent;
+            this.holder = holder;
         }
         public String getUrl(){
             return url;
         }
-        public View getParent(){
-            return parent;
+        public ViewHolderItem getHolder(){
+            return holder;
         }
     }
     private class GetImg extends AsyncTask<ImgInfo, Void, Bitmap > {
-        View savelink;
+        ViewHolderItem savelink;
         @Override
         protected Bitmap doInBackground(ImgInfo... info) {
             // TODO Auto-generated method stub
             try{
                 URL feedImage= new URL(info[0].getUrl());
-                savelink = info[0].getParent();
+                savelink = info[0].getHolder();
                 HttpURLConnection conn= (HttpURLConnection)feedImage.openConnection();
                 InputStream is  = conn.getInputStream();
                 Bitmap img = BitmapFactory.decodeStream(is);
@@ -85,8 +96,7 @@ public class MyAdapter extends ArrayAdapter<RssItem> {
         @Override
         protected void onPostExecute(Bitmap result) {
             // TODO Auto-generated method stub
-            ((ImageView) savelink.findViewById(R.id.imageView1))
-                    .setImageBitmap(result);
+            savelink.image.setImageBitmap(result);
         }
 
 

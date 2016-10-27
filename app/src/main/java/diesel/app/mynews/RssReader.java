@@ -1,5 +1,6 @@
 package diesel.app.mynews;
 
+import java.io.File;
 import java.util.List;
 
 import javax.xml.parsers.SAXParser;
@@ -22,6 +23,7 @@ public class RssReader {
         SAXParser saxParser = factory.newSAXParser();
 
         RssParser handler = new RssParser();
+
 
         saxParser.parse(rssUrl, handler);
 

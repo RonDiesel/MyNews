@@ -10,6 +10,8 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import static android.R.attr.data;
+
 /**
  * Created by Rinat Galiev on 21.10.2016.
  */
@@ -17,18 +19,29 @@ public class FeedListAdapter extends ArrayAdapter<String> {
     public FeedListAdapter(Context context, List<String> res) {
         super(context, R.layout.item_settings, res);
     }
+    static class ViewHolderItem {
+        TextView feedTextView;
+        Button delleteButton;
+    }
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        String item = getItem(position);
+        ViewHolderItem viewHolder;
+       String item = getItem(position);
+
 
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext())
                     .inflate(R.layout.item_settings, null);
-        }
+            viewHolder = new ViewHolderItem();
+            viewHolder.feedTextView = (TextView) convertView.findViewById(R.id.feedTextView);
+            viewHolder.delleteButton = (Button) convertView.findViewById(R.id.delleteButton);
 
-        ((TextView) convertView.findViewById(R.id.feedTextView))
-                .setText(item);
-    //    ((Button) convertView.findViewById(R.id.delleteButton)).set
+            convertView.setTag(viewHolder);
+        }else{
+            viewHolder = (ViewHolderItem) convertView.getTag();
+        }
+        viewHolder.feedTextView.setText(item);
+        viewHolder.delleteButton.setTag(position);
 
         return convertView;
     }
