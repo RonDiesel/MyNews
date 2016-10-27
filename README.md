@@ -1,2 +1,2 @@
 # MyNews
-Rss reader
+Simple Rss reader for Android
